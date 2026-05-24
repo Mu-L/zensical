@@ -41,11 +41,11 @@ from tomli import load as toml_load
 from yaml import Loader, YAMLError
 from yaml.constructor import ConstructorError
 
-from zensical.compat.mkdocstrings import get_mkdocstrings_extension
 from zensical.extensions.autorefs import AutorefsExtension
 from zensical.extensions.emoji import to_svg, twemoji
 from zensical.extensions.glightbox import GlightboxExtension
 from zensical.extensions.macros import MacrosExtension
+from zensical.extensions.mkdocstrings import MkdocstringsExtension
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -679,7 +679,7 @@ def _apply_defaults(config: dict, path: str) -> dict:
     # Map plugins configuration to Markdown extensions
     _shim_autorefs(config)
     _shim_markdown_exec(config)
-    _shim_mkdocstrings(config, path)
+    _shim_mkdocstrings(config)
     _shim_glightbox(config)
     _shim_macros(config)
 
@@ -858,19 +858,19 @@ def _shim_markdown_exec(config: dict[str, Any]) -> None:
             )
 
 
-def _shim_mkdocstrings(config: dict[str, Any], path: str) -> None:
+def _shim_mkdocstrings(config: dict[str, Any]) -> None:
     # Map mkdocstrings plugin configuration to the extension configuration
     if "mkdocstrings" in config["plugins"]:
-        mkdocstrings_config = config["plugins"]["mkdocstrings"]["config"]
-        if mkdocstrings_config.get("enabled", True):
+        plugin = config["plugins"]["mkdocstrings"]["config"]
+        if plugin.get("enabled", True):
             if not find_spec("mkdocstrings"):
                 raise ConfigurationError(
                     "mkdocstrings plugin is enabled, but mkdocstrings is not "
                     "installed. Please install mkdocstrings or disable the "
                     "plugin."
                 )
-            mkdocstrings = get_mkdocstrings_extension(config, path)
-            config["markdown_extensions"].append(mkdocstrings)
+            config["markdown_extensions"].append(MkdocstringsExtension.name)
+            config["mdx_configs"][MkdocstringsExtension.name] = plugin
 
 
 def _shim_glightbox(config: dict[str, Any]) -> None:
