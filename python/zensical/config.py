@@ -830,6 +830,9 @@ def _shim_autorefs(config: dict[str, Any]) -> None:
         plugin = config["plugins"]["mkdocstrings"]["config"]
         if plugin.get("enabled", True):
             config["markdown_extensions"].append(AutorefsExtension.name)
+    elif "zensical.extensions.mkdocstrings" in config["markdown_extensions"]:
+        # same when mkdocstrings is enabled as a Markdown extension
+        config["markdown_extensions"].append(AutorefsExtension.name)
 
 
 def _shim_markdown_exec(config: dict[str, Any]) -> None:
